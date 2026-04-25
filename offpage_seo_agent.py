@@ -1,5 +1,7 @@
 import anthropic
+import os
 from anthropic import beta_tool
+from datetime import datetime
 
 client = anthropic.Anthropic()
 
@@ -174,17 +176,29 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    reports_dir = "reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    report_filename = f"{reports_dir}/seo_report_{your_domain.replace('.', '_')}_{date_str}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {date_str}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
+
+ALFAAPANELS_CONFIG = {
+    "your_domain": "alfaapanels.com",
+    "brand_name": "Alfa Panels",
+    "niche": "solar panels energy systems photovoltaic",
+    "competitors": [
+        "sunpowercorp.com",
+        "lgelectronics.com/solar",
+        "canadian-solar.com",
+        "jinko-solar.com",
+    ],
+}
 
 if __name__ == "__main__":
-    run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
-    )
+    run_offpage_seo_agent(**ALFAAPANELS_CONFIG)
