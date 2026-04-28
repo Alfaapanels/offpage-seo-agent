@@ -1,0 +1,49 @@
+name: Daily Backlink Building
+
+on:
+  schedule:
+    - cron: '0 9 * * *'   # Every day at 09:00 UTC
+  workflow_dispatch:        # Allow manual trigger from Actions tab
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily backlink agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TARGET_DOMAIN: alfaapanels.com
+          BRAND_NAME: Alfa Panels
+          NICHE: aluminum composite panels and building materials
+          COMPETITORS: alucobond.com,reynobond.com,alpolic.com
+        run: python offpage_seo_agent.py
+
+      - name: Upload daily report as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backlink-report-${{ github.run_number }}
+          path: reports/
+          retention-days: 90
+
+      - name: Commit report to repository
+        if: success()
+        run: |
+          git config --global user.name "Backlink Agent"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git diff --staged --quiet || git commit -m "Daily backlink report $(date -u +%Y-%m-%d)"
+          git push origin HEAD || echo "Nothing to push"
