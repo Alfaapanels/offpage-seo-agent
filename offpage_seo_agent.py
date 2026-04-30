@@ -127,7 +127,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-4-7",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
