@@ -1,0 +1,8 @@
+# Runtime artifacts
+backlink_log.json
+reports/
+seo_report_*.md
+*.pyc
+__pycache__/
+.env
+.env.*
