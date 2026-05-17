@@ -1,0 +1,42 @@
+name: Daily Backlink Builder — alfaapanels.com
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # 09:00 UTC every day
+  workflow_dispatch:      # allow manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python daily_backlink_builder.py
+
+      - name: Commit and push results
+        run: |
+          git config user.name  "Backlink Builder Bot"
+          git config user.email "bot@alfaapanels.com"
+          git add reports/ backlink_tracker.json
+          git diff --staged --quiet || \
+            git commit -m "chore: daily backlink report $(date -u +%Y-%m-%d)"
+          git push
