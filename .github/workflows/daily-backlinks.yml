@@ -1,0 +1,60 @@
+name: Daily Backlink Builder – alfaapanels.com
+
+on:
+  schedule:
+    # Runs every day at 07:00 UTC
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Backlink task to run (leave blank for auto daily rotation)"
+        required: false
+        default: ""
+        type: choice
+        options:
+          - ""
+          - brand_mentions
+          - competitor_gaps
+          - resource_pages
+          - guest_posts
+          - broken_links
+          - directory_listings
+          - weekly_summary
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit reports back to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "${{ github.event.inputs.task }}" ]; then
+            python daily_backlink_builder.py --task "${{ github.event.inputs.task }}"
+          else
+            python daily_backlink_builder.py
+          fi
+
+      - name: Commit reports and tracking data
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/ backlink_tracking.json || true
+          git diff --cached --quiet || git commit -m "chore: daily backlink report $(date -u +%Y-%m-%d)"
+          git push
