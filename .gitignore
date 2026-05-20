@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+daily_reports/
+backlink_tracker.json
+seo_report_*.md
+.env
