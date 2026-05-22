@@ -1,0 +1,49 @@
+name: Daily Backlink Builder – alfaapanels.com
+
+on:
+  schedule:
+    # Run every day at 09:00 UTC
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Set to 'true' to skip committing the report"
+        required: false
+        default: "false"
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT so the bot can push the daily report back
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python daily_backlink_builder.py --once
+
+      - name: Commit and push daily report
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config --local user.email "seo-agent@alfaapanels.com"
+          git config --local user.name "Alfa Panels SEO Agent"
+          git add reports/ backlink_tracker.json
+          # Only commit if there are staged changes
+          git diff --staged --quiet || \
+            git commit -m "chore: daily backlink report $(date +%Y-%m-%d)"
+          git push
