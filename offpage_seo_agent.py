@@ -24,6 +24,7 @@ def analyze_backlink_quality(url: str, backlink_url: str, anchor_text: str) -> s
         quality_signals.append("Domain appears clean")
     return "\n".join(quality_signals)
 
+
 @beta_tool
 def categorize_brand_mention(mention_text: str, brand_name: str) -> str:
     """Categorize a brand mention as linked/unlinked and sentiment.
@@ -45,6 +46,7 @@ def categorize_brand_mention(mention_text: str, brand_name: str) -> str:
         sentiment = "Neutral"
     mention_type = "Linked mention" if has_link else "Unlinked mention (link building opportunity!)"
     return f"Brand: {brand_name}\nType: {mention_type}\nSentiment: {sentiment}\nAction: {'Monitor' if has_link else 'Reach out to add your link'}"
+
 
 @beta_tool
 def score_link_prospect(page_url: str, page_title: str, page_content_snippet: str, your_niche: str) -> str:
@@ -83,6 +85,7 @@ def score_link_prospect(page_url: str, page_title: str, page_content_snippet: st
     priority = "HIGH PRIORITY" if score >= 70 else "MEDIUM" if score >= 40 else "LOW"
     return f"Prospect Score: {score}/100 - {priority}\nURL: {page_url}\nReasons:\n" + "\n".join(reasons)
 
+
 @beta_tool
 def generate_outreach_template(
     prospect_name: str,
@@ -109,6 +112,7 @@ def generate_outreach_template(
         "mention": f"Subject: You mentioned {your_site} - thank you!\n\nHi {prospect_name},\n\nThank you for mentioning {your_site} in your article about {their_page_topic}!\n\nWould you be open to linking directly to {your_content_url}?\n\nThanks,\n[Your Name]"
     }
     return templates.get(link_type, templates["resource"])
+
 
 @beta_tool
 def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, linking_page_topic: str) -> str:
@@ -183,8 +187,8 @@ Create a prioritized 30-day off-page SEO action plan."""
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="aluminum composite panels building materials cladding facades",
+        competitors=["alucobond.com", "reynobond.com", "alpolic.com"]
     )
