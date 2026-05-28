@@ -1,0 +1,42 @@
+name: Daily Backlink Builder – alfaapanels.com
+
+on:
+  schedule:
+    # Runs every day at 07:00 UTC
+    - cron: "0 7 * * *"
+  workflow_dispatch:  # allow manual trigger from GitHub UI
+
+permissions:
+  contents: write  # needed to commit the daily report back to the repo
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python daily_backlink_builder.py
+
+      - name: Commit report and updated outreach log
+        run: |
+          git config user.name  "Alfa Panels SEO Bot"
+          git config user.email "info@alfaapanels.com"
+          git add reports/ outreach_log.json || true
+          git diff --cached --quiet || git commit -m "chore: daily backlink report $(date -u +%Y-%m-%d)"
+          git push origin HEAD
