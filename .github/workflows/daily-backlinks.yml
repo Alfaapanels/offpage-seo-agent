@@ -1,0 +1,60 @@
+name: Daily Backlink Builder
+
+on:
+  schedule:
+    # Runs every day at 07:00 UTC (ideal for morning outreach)
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      strategy:
+        description: 'Override today''s strategy (leave blank for auto)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - brand_mentions
+          - competitor_gaps
+          - resource_pages
+          - guest_posts
+          - broken_links
+          - directories
+          - forums_qa
+
+jobs:
+  build-backlinks:
+    name: Run daily backlink agent
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python daily_backlink_builder.py
+
+      - name: Commit reports and state
+        run: |
+          git config user.name  "SEO Agent"
+          git config user.email "seo-agent@alfaapanels.com"
+          git add reports/ backlink_state.json 2>/dev/null || true
+          if git diff --staged --quiet; then
+            echo "Nothing new to commit."
+          else
+            git commit -m "Daily backlink report $(date -u +%Y-%m-%d)"
+            git push origin HEAD
+          fi
