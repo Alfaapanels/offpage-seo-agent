@@ -123,7 +123,9 @@ def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, link
 
 
 def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competitors: list):
-    print(f"\nStarting Off-Page SEO Agent for: {your_domain}\n")
+    from datetime import date
+    today = date.today().isoformat()
+    print(f"\nStarting Off-Page SEO Agent for: {your_domain} | Date: {today}\n")
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
@@ -174,17 +176,27 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    import os
+    reports_dir = "reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    report_filename = f"{reports_dir}/seo_report_{your_domain.replace('.', '_')}_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {today}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="aluminum composite panels facade cladding building materials",
+        competitors=[
+            "alucobond.com",
+            "reynobond.com",
+            "alucoil.com",
+            "alpolic.com",
+        ]
     )
