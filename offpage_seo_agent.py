@@ -123,7 +123,9 @@ def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, link
 
 
 def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competitors: list):
-    print(f"\nStarting Off-Page SEO Agent for: {your_domain}\n")
+    from datetime import date
+    today = date.today().isoformat()
+    print(f"\nStarting Off-Page SEO Agent for: {your_domain} | {today}\n")
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
@@ -146,6 +148,7 @@ Perform a complete off-page SEO analysis for: {your_domain}
 Brand name: {brand_name}
 Niche: {niche}
 Competitors: {', '.join(competitors)}
+Today's date: {today}
 
 Execute these tasks:
 
@@ -174,17 +177,23 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    report_filename = f"seo_report_{your_domain.replace('.', '_')}_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n**Date:** {today}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
 
 
+# --- Configuration for alfaapanels.com ---
+DOMAIN = "alfaapanels.com"
+BRAND = "Alfaa Panels"
+NICHE = "sandwich panel manufacturer insulated panels PUF PIR rockwool cold room clean room India"
+COMPETITORS = ["epackprefab.com", "metecno.in", "koreapuf.com", "industrialfoams.com"]
+
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain=DOMAIN,
+        brand_name=BRAND,
+        niche=NICHE,
+        competitors=COMPETITORS,
     )
