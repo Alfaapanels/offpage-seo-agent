@@ -3,7 +3,34 @@ import os
 from datetime import datetime
 from anthropic import beta_tool
 
-client = anthropic.Anthropic()
+
+def _get_auth_token() -> str | None:
+    """Read OAuth token from Claude Code session token file if present."""
+    token_file = os.environ.get(
+        "CLAUDE_SESSION_INGRESS_TOKEN_FILE",
+        "/home/claude/.claude/remote/.session_ingress_token",
+    )
+    if token_file and os.path.isfile(token_file):
+        try:
+            token = open(token_file).read().strip()
+            if token:
+                return token
+        except OSError:
+            pass
+    return None
+
+
+def _make_client() -> anthropic.Anthropic:
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if api_key:
+        return anthropic.Anthropic(api_key=api_key)
+    auth_token = _get_auth_token()
+    if auth_token:
+        return anthropic.Anthropic(auth_token=auth_token)
+    return anthropic.Anthropic()  # let the SDK raise its own error
+
+
+client = _make_client()
 
 # ── Alfaa Panels configuration ────────────────────────────────────────────────
 TARGET_DOMAIN  = "alfaapanels.com"
