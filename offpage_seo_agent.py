@@ -283,7 +283,7 @@ For each unlinked mention found: use categorize_brand_mention and generate a 'me
 ──────────────────────────────────────────────────────────────
 TASK 2 – COMPETITOR BACKLINK GAPS
 For each competitor, search:
-  link:{competitor} OR "{competitor} sandwich panels"
+  link:[competitor-domain] OR "[competitor-domain] sandwich panels"
 Find pages linking to competitors but NOT to {your_domain}.
 For each gap: use identify_link_gap_opportunity and score the prospect with score_link_prospect.
 
