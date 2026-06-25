@@ -282,9 +282,12 @@ TOOL_SCHEMAS = [
             "required": ["niche", "location"],
         },
     },
-    {"type": "web_search_20260209", "name": "web_search"},
-    {"type": "web_fetch_20260209",  "name": "web_fetch"},
+    # web_search_20250305 works with session tokens (20260209 bundles bash which is blocked)
+    {"type": "web_search_20250305", "name": "web_search"},
 ]
+
+# Beta header required for the 2025-03-05 web search tool
+WEB_SEARCH_BETA_HEADER = "web-search-2025-03-05"
 
 
 def _dispatch_tool(name: str, inputs: dict) -> str:
@@ -394,13 +397,13 @@ End with a one-paragraph executive summary for a daily email update."""
 
     while iterations < max_iterations:
         iterations += 1
-        response = client.beta.messages.create(
+        response = client.messages.create(
             model="claude-opus-4-6",
             max_tokens=16000,
             system=system_prompt,
             tools=TOOL_SCHEMAS,
             messages=messages,
-            betas=["web-search-2025-03-05"],
+            extra_headers={"anthropic-beta": WEB_SEARCH_BETA_HEADER},
         )
 
         # Collect any text in this response turn
@@ -412,32 +415,37 @@ End with a one-paragraph executive summary for a daily email update."""
         if response.stop_reason == "end_turn":
             break
 
-        if response.stop_reason != "tool_use":
-            break  # unexpected stop
+        # web_search results arrive as server_tool_use (handled server-side, no local dispatch needed)
+        # Custom tool calls arrive as tool_use (need local dispatch)
+        if response.stop_reason not in ("tool_use", "server_tool_use"):
+            break
 
-        # Handle tool calls
         tool_results = []
         for block in response.content:
-            if not (hasattr(block, "type") and block.type == "tool_use"):
-                continue
-            tool_name = block.name
-            tool_input = block.input if isinstance(block.input, dict) else {}
-            print(f"  [tool] {tool_name}({', '.join(f'{k}={repr(v)[:60]}' for k, v in tool_input.items())})")
+            block_type = getattr(block, "type", None)
 
-            # Only dispatch locally-defined tools; web_search/web_fetch are handled by the API
-            if tool_name in (
-                "analyze_backlink_quality", "categorize_brand_mention",
-                "score_link_prospect", "generate_outreach_template",
-                "identify_link_gap_opportunity", "find_directory_submission_targets",
-            ):
-                result_content = _dispatch_tool(tool_name, tool_input)
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": result_content,
-                })
+            if block_type == "server_tool_use":
+                # web_search is fully server-side; result is already in the next assistant message
+                print(f"  [web_search] query={getattr(block, 'input', {}).get('query', '')!r}")
 
-        # Append assistant turn + tool results
+            elif block_type == "tool_use":
+                tool_name = block.name
+                tool_input = block.input if isinstance(block.input, dict) else {}
+                print(f"  [tool] {tool_name}({', '.join(f'{k}={repr(v)[:60]}' for k, v in tool_input.items())})")
+
+                if tool_name in (
+                    "analyze_backlink_quality", "categorize_brand_mention",
+                    "score_link_prospect", "generate_outreach_template",
+                    "identify_link_gap_opportunity", "find_directory_submission_targets",
+                ):
+                    result_content = _dispatch_tool(tool_name, tool_input)
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result_content,
+                    })
+
+        # Append assistant turn; only add user turn when there are local tool results
         messages.append({"role": "assistant", "content": response.content})
         if tool_results:
             messages.append({"role": "user", "content": tool_results})
