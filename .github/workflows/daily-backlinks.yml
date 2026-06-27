@@ -1,0 +1,86 @@
+name: Daily Backlink Builder
+
+on:
+  schedule:
+    # 2:30 AM UTC = 8:00 AM IST — runs every day
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      strategy_override:
+        description: "Force a specific strategy (leave blank to use today's rotation)"
+        required: false
+        type: choice
+        options:
+          - ""
+          - directory_submission
+          - qa_platform_engagement
+          - resource_page_outreach
+          - competitor_gap_analysis
+          - brand_mention_recovery
+          - forum_community_building
+          - social_profile_building
+
+permissions:
+  contents: write
+
+jobs:
+  build-backlinks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Apply strategy override (if set)
+        if: ${{ github.event.inputs.strategy_override != '' }}
+        run: |
+          python - <<'EOF'
+          import datetime, sys
+          strategies = {
+              "directory_submission": 0,
+              "qa_platform_engagement": 1,
+              "resource_page_outreach": 2,
+              "competitor_gap_analysis": 3,
+              "brand_mention_recovery": 4,
+              "forum_community_building": 5,
+              "social_profile_building": 6,
+          }
+          override = "${{ github.event.inputs.strategy_override }}"
+          if override in strategies:
+              # Patch daily_backlink_builder.py weekday → override
+              import re
+              with open("daily_backlink_builder.py") as f:
+                  src = f.read()
+              day_num = strategies[override]
+              patched = re.sub(
+                  r'strategy = DAILY_STRATEGIES\[today\.weekday\(\)\]',
+                  f'strategy = "{override}"  # overridden by workflow_dispatch',
+                  src
+              )
+              with open("daily_backlink_builder.py", "w") as f:
+                  f.write(patched)
+              print(f"Strategy overridden to: {override}")
+          EOF
+
+      - name: Run daily backlink builder
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python daily_backlink_builder.py
+
+      - name: Commit report and updated log
+        run: |
+          git config user.name "Backlink Bot"
+          git config user.email "info@alfaapanels.com"
+          git add reports/ backlink_log.json
+          git diff --cached --quiet && echo "Nothing new to commit" || \
+            git commit -m "Daily backlink report — $(date -u +'%Y-%m-%d')"
+          git push origin HEAD
