@@ -1,0 +1,41 @@
+name: Daily Off-Page SEO Agent
+
+on:
+  schedule:
+    # Runs every day at 03:23 UTC
+    - cron: "23 3 * * *"
+  workflow_dispatch:  # allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  run-seo-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: claude/friendly-euler-k89szj
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Off-Page SEO Agent for alfaapanels.com
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python offpage_seo_agent.py
+
+      - name: Commit and push SEO report
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git diff --cached --quiet || \
+            git commit -m "chore: daily SEO backlink report $(date -u +%Y-%m-%d)" && \
+            git push origin claude/friendly-euler-k89szj
