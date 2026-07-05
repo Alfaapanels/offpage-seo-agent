@@ -1,0 +1,66 @@
+name: Daily Backlink Builder – alfaapanels.com
+
+on:
+  schedule:
+    # Runs every day at 07:00 UTC
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Set to 'true' to print config only, skip API calls"
+        required: false
+        default: "false"
+
+jobs:
+  build-backlinks:
+    name: Run Off-Page SEO Agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: write   # needed to commit the daily report back to the repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run backlink agent
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python offpage_seo_agent.py
+
+      - name: Dry-run – print config only
+        if: ${{ github.event.inputs.dry_run == 'true' }}
+        run: |
+          python - <<'EOF'
+          from offpage_seo_agent import DOMAIN, BRAND_NAME, NICHE, COMPETITORS
+          print(f"Domain    : {DOMAIN}")
+          print(f"Brand     : {BRAND_NAME}")
+          print(f"Niche     : {NICHE}")
+          print(f"Competitors: {COMPETITORS}")
+          print("Dry run – no API calls made.")
+          EOF
+
+      - name: Commit daily report
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          if git diff --cached --quiet; then
+            echo "No new report to commit."
+          else
+            DATE=$(date -u +%Y-%m-%d)
+            git commit -m "chore: daily SEO report $DATE for alfaapanels.com"
+            git push
+          fi

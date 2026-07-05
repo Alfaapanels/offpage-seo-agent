@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+
+# Local SEO report outputs (committed by CI, not by hand)
+seo_report_*.md
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
