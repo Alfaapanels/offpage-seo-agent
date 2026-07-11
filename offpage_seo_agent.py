@@ -103,10 +103,10 @@ def generate_outreach_template(
         link_type: Type: 'guest_post', 'broken_link', 'resource', 'mention'.
     """
     templates = {
-        "broken_link": f"Subject: Broken link on your {their_page_topic} page\n\nHi {prospect_name},\n\nI noticed a broken link on your {their_page_topic} page on {prospect_site}.\n\nI have a comprehensive guide at {your_content_url} that would be a great replacement.\n\nWould you consider updating the link?\n\nBest,\n[Your Name]",
-        "guest_post": f"Subject: Guest Post Idea for {prospect_site}\n\nHi {prospect_name},\n\nI love your content on {prospect_site} about {their_page_topic}.\n\nI'd love to contribute a guest post. I write for {your_site}.\n\nWould you be open to a collaboration?\n\nBest,\n[Your Name]",
-        "resource": f"Subject: Resource suggestion for your {their_page_topic} page\n\nHi {prospect_name},\n\nYour resource page on {their_page_topic} is great! I created {your_content_url} which might help your readers.\n\nWould you take a look?\n\nBest,\n[Your Name]",
-        "mention": f"Subject: You mentioned {your_site} - thank you!\n\nHi {prospect_name},\n\nThank you for mentioning {your_site} in your article about {their_page_topic}!\n\nWould you be open to linking directly to {your_content_url}?\n\nThanks,\n[Your Name]"
+        "broken_link": f"Subject: Broken link on your {their_page_topic} page\n\nHi {prospect_name},\n\nI noticed a broken link on your {their_page_topic} page on {prospect_site}.\n\nI have a comprehensive guide at {your_content_url} that would be a great replacement.\n\nWould you consider updating the link?\n\nBest,\n[Your Name]\nAlfaa Panels",
+        "guest_post": f"Subject: Guest Post Idea for {prospect_site}\n\nHi {prospect_name},\n\nI love your content on {prospect_site} about {their_page_topic}.\n\nI'd love to contribute a guest post representing Alfaa Panels — India's leading sandwich panel manufacturer with 35+ years of expertise.\n\nWould you be open to a collaboration?\n\nBest,\n[Your Name]\nAlfaa Panels",
+        "resource": f"Subject: Resource suggestion for your {their_page_topic} page\n\nHi {prospect_name},\n\nYour resource page on {their_page_topic} is great! Alfaa Panels created {your_content_url} which might help your readers — it covers PUF, PIR, and cold room panel selection with a buyer's guide.\n\nWould you take a look?\n\nBest,\n[Your Name]\nAlfaa Panels",
+        "mention": f"Subject: You mentioned Alfaa Panels - thank you!\n\nHi {prospect_name},\n\nThank you for mentioning Alfaa Panels in your article about {their_page_topic}!\n\nWould you be open to linking directly to {your_content_url} for your readers' reference?\n\nThanks,\n[Your Name]\nAlfaa Panels"
     }
     return templates.get(link_type, templates["resource"])
 
@@ -127,7 +127,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-4-8",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
@@ -140,7 +140,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
         ],
         messages=[{
             "role": "user",
-            "content": f"""You are an expert off-page SEO strategist.
+            "content": f"""You are an expert off-page SEO strategist for Indian B2B manufacturing.
 Perform a complete off-page SEO analysis for: {your_domain}
 
 Brand name: {brand_name}
@@ -155,15 +155,17 @@ Search: "{brand_name}" -site:{your_domain}
 
 TASK 2 - Competitor Backlink Research
 For each competitor, find sites linking to them but not to {your_domain}.
+Focus on construction, architecture, cold storage, and pharma industry sites.
 
 TASK 3 - Link Building Opportunities
-Find resource pages, guest post opportunities, broken links in {niche} niche.
+Find resource pages, guest post opportunities, broken links in the {niche} niche.
+Target: Indian construction blogs, architecture sites, industry directories (IndiaMart, TradeIndia, JustDial).
 
 TASK 4 - Outreach Templates
 Generate personalized email templates for top 3 prospects.
 
 TASK 5 - Final Report
-Create a prioritized 30-day off-page SEO action plan."""
+Create a prioritized 30-day off-page SEO action plan with specific URLs and contact steps."""
         }],
     )
 
@@ -174,17 +176,20 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    from datetime import date
+    report_filename = f"seo_report_{your_domain.replace('.', '_')}_{date.today().isoformat()}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {date.today().isoformat()}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfaa Panels",
+        niche="sandwich panel PUF PIR cold room clean room insulation India",
+        competitors=["kingspanjindal.com", "metecno.in", "rinac.com", "epack.in"]
     )
