@@ -1,5 +1,7 @@
 import anthropic
 from anthropic import beta_tool
+from datetime import datetime
+import os
 
 client = anthropic.Anthropic()
 
@@ -122,12 +124,15 @@ def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, link
     return f"LINK GAP OPPORTUNITY\nCompetitor: {competitor_domain}\nYour site: {your_domain}\nLinking page topic: {linking_page_topic}\n\nActions:\n1. Find what content earned {competitor_domain} this link\n2. Create better content on the same topic for {your_domain}\n3. Reach out to the linking page with your resource"
 
 
-def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competitors: list):
-    print(f"\nStarting Off-Page SEO Agent for: {your_domain}\n")
-    print("=" * 60)
+def run_daily_backlink_session(your_domain: str, brand_name: str, niche: str, competitors: list):
+    today = datetime.now().strftime("%Y-%m-%d")
+    print(f"\n{'='*60}")
+    print(f"Daily Backlink Building Session: {today}")
+    print(f"Target: {your_domain}")
+    print(f"{'='*60}\n")
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-5",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
@@ -140,30 +145,47 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
         ],
         messages=[{
             "role": "user",
-            "content": f"""You are an expert off-page SEO strategist.
-Perform a complete off-page SEO analysis for: {your_domain}
+            "content": f"""You are an expert off-page SEO strategist. Today is {today}.
+
+Perform a complete daily backlink building session for: {your_domain}
 
 Brand name: {brand_name}
 Niche: {niche}
-Competitors: {', '.join(competitors)}
+Known competitors: {', '.join(competitors)}
 
-Execute these tasks:
+IMPORTANT: First use web_search to understand what {your_domain} does and sells, then execute each task.
 
 TASK 1 - Brand Mention Audit
-Search for "{brand_name}" mentions. Find unlinked mentions and opportunities.
-Search: "{brand_name}" -site:{your_domain}
+Search for "{brand_name}" mentions across the web. Find at least 5 unlinked brand mentions and opportunities.
+Search queries to use:
+- "{brand_name}" -site:{your_domain}
+- "{brand_name}" site:reddit.com OR site:quora.com OR site:forums.com
+- "{brand_name}" review OR mentioned OR recommended
 
 TASK 2 - Competitor Backlink Research
-For each competitor, find sites linking to them but not to {your_domain}.
+For each competitor, find 3-5 sites linking to them that could also link to {your_domain}.
+Search: link:[competitor] OR site linking to [competitor] panels OR solar OR renewable
 
-TASK 3 - Link Building Opportunities
-Find resource pages, guest post opportunities, broken links in {niche} niche.
+TASK 3 - Link Building Opportunities (Daily Fresh Prospects)
+Find NEW resource pages, guest post opportunities, and broken links in the {niche} niche:
+- "write for us" {niche}
+- intitle:"resources" OR intitle:"links" {niche}
+- "{niche}" "submit article" OR "guest author"
+- directories for {niche} businesses
+Score each prospect using the score_link_prospect tool.
 
 TASK 4 - Outreach Templates
-Generate personalized email templates for top 3 prospects.
+Generate personalized outreach email templates for the top 3 highest-scored prospects found today.
 
-TASK 5 - Final Report
-Create a prioritized 30-day off-page SEO action plan."""
+TASK 5 - Daily Action Plan
+Create a prioritized list of TODAY's top 5-10 specific backlink building actions.
+Include:
+- Exact URLs to reach out to
+- Email subject lines ready to send
+- Priority ranking (High/Medium/Low)
+- Expected DA/authority level
+
+Format the final output as a clean markdown report with clear sections."""
         }],
     )
 
@@ -174,17 +196,21 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    report_dir = "reports"
+    os.makedirs(report_dir, exist_ok=True)
+    report_filename = f"{report_dir}/backlink_report_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Daily Backlink Building Report: {your_domain}\n")
+        f.write(f"**Date:** {today}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
 
 if __name__ == "__main__":
-    run_offpage_seo_agent(
+    run_daily_backlink_session(
         your_domain="alfaapanels.com",
-        brand_name="Alfaa Panels",
-        niche="PUF PIR Rockwool sandwich panel manufacturer India cold room clean room",
-        competitors=["rinac.com", "epack.in", "mekarkprefab.com", "viraatindustries.com"]
+        brand_name="Alfa Panels",
+        niche="solar panels and renewable energy",
+        competitors=["solaredge.com", "enphase.com", "jinko-solar.com"]
     )
