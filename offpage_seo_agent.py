@@ -127,7 +127,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-5",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
@@ -183,8 +183,8 @@ Create a prioritized 30-day off-page SEO action plan."""
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="PUF PIR Rockwool insulated sandwich panels cold room clean room prefab buildings India",
+        competitors=["epack.in", "viraatindustries.com", "alfapeb.in", "industrialfoams.com"]
     )
