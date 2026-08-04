@@ -183,8 +183,8 @@ Create a prioritized 30-day off-page SEO action plan."""
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="insulated sandwich panels construction building materials",
+        competitors=["kingspan.com", "rockwool.com", "ruukki.com"]
     )
