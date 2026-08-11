@@ -103,10 +103,10 @@ def generate_outreach_template(
         link_type: Type: 'guest_post', 'broken_link', 'resource', 'mention'.
     """
     templates = {
-        "broken_link": f"Subject: Broken link on your {their_page_topic} page\n\nHi {prospect_name},\n\nI noticed a broken link on your {their_page_topic} page on {prospect_site}.\n\nI have a comprehensive guide at {your_content_url} that would be a great replacement.\n\nWould you consider updating the link?\n\nBest,\n[Your Name]",
-        "guest_post": f"Subject: Guest Post Idea for {prospect_site}\n\nHi {prospect_name},\n\nI love your content on {prospect_site} about {their_page_topic}.\n\nI'd love to contribute a guest post. I write for {your_site}.\n\nWould you be open to a collaboration?\n\nBest,\n[Your Name]",
-        "resource": f"Subject: Resource suggestion for your {their_page_topic} page\n\nHi {prospect_name},\n\nYour resource page on {their_page_topic} is great! I created {your_content_url} which might help your readers.\n\nWould you take a look?\n\nBest,\n[Your Name]",
-        "mention": f"Subject: You mentioned {your_site} - thank you!\n\nHi {prospect_name},\n\nThank you for mentioning {your_site} in your article about {their_page_topic}!\n\nWould you be open to linking directly to {your_content_url}?\n\nThanks,\n[Your Name]"
+        "broken_link": f"Subject: Broken link on your {their_page_topic} page\n\nHi {prospect_name},\n\nI noticed a broken link on your {their_page_topic} page on {prospect_site}.\n\nI have a comprehensive guide at {your_content_url} that would be a great replacement.\n\nWould you consider updating the link?\n\nBest,\nAlfaa Panels Team",
+        "guest_post": f"Subject: Guest Post Idea for {prospect_site}\n\nHi {prospect_name},\n\nI love your content on {prospect_site} about {their_page_topic}.\n\nI'd love to contribute a guest post on behalf of Alfaa Panels — India's leading sandwich panel manufacturer with 35+ years of experience.\n\nWould you be open to a collaboration?\n\nBest,\nAlfaa Panels Team",
+        "resource": f"Subject: Resource suggestion for your {their_page_topic} page\n\nHi {prospect_name},\n\nYour resource page on {their_page_topic} is great! We at Alfaa Panels created {your_content_url} which might help your readers understand insulated sandwich panels better.\n\nWould you take a look?\n\nBest,\nAlfaa Panels Team",
+        "mention": f"Subject: You mentioned Alfaa Panels - thank you!\n\nHi {prospect_name},\n\nThank you for mentioning Alfaa Panels in your article about {their_page_topic}!\n\nWould you be open to linking directly to {your_content_url} for your readers' reference?\n\nThanks,\nAlfaa Panels Team"
     }
     return templates.get(link_type, templates["resource"])
 
@@ -122,12 +122,50 @@ def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, link
     return f"LINK GAP OPPORTUNITY\nCompetitor: {competitor_domain}\nYour site: {your_domain}\nLinking page topic: {linking_page_topic}\n\nActions:\n1. Find what content earned {competitor_domain} this link\n2. Create better content on the same topic for {your_domain}\n3. Reach out to the linking page with your resource"
 
 
-def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competitors: list):
-    print(f"\nStarting Off-Page SEO Agent for: {your_domain}\n")
+ALFAA_CONFIG = {
+    "domain": "alfaapanels.com",
+    "brand_name": "Alfaa Panels",
+    "niche": "sandwich panel manufacturer cold room PUF PIR insulated panels India",
+    "competitors": [
+        "epack.in",
+        "rinac.com",
+        "kingspanjindal.com",
+        "metecno.in",
+        "nestin.in",
+    ],
+    "key_products": [
+        "PUF sandwich panels",
+        "PIR sandwich panels",
+        "Rockwool panels",
+        "cold room panels",
+        "clean room panels",
+        "heat insulation panels",
+    ],
+    "target_industries": [
+        "cold storage",
+        "warehousing",
+        "food processing",
+        "pharmaceuticals",
+        "industrial construction",
+        "prefabricated buildings",
+    ],
+}
+
+
+def run_offpage_seo_agent(config: dict = None, report_date: str = None):
+    cfg = config or ALFAA_CONFIG
+    your_domain = cfg["domain"]
+    brand_name = cfg["brand_name"]
+    niche = cfg["niche"]
+    competitors = cfg["competitors"]
+
+    print(f"\nStarting Off-Page SEO Agent for: {your_domain}")
+    if report_date:
+        print(f"Report Date: {report_date}")
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-4-5",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
@@ -140,30 +178,47 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
         ],
         messages=[{
             "role": "user",
-            "content": f"""You are an expert off-page SEO strategist.
-Perform a complete off-page SEO analysis for: {your_domain}
+            "content": f"""You are an expert off-page SEO strategist for Alfaa Panels, India's leading sandwich panel manufacturer.
 
-Brand name: {brand_name}
+Domain: {your_domain}
+Brand: {brand_name}
 Niche: {niche}
 Competitors: {', '.join(competitors)}
+Key Products: {', '.join(cfg.get('key_products', []))}
+Target Industries: {', '.join(cfg.get('target_industries', []))}
+Report Date: {report_date or 'Today'}
 
-Execute these tasks:
+Execute ALL of the following tasks systematically:
 
 TASK 1 - Brand Mention Audit
-Search for "{brand_name}" mentions. Find unlinked mentions and opportunities.
-Search: "{brand_name}" -site:{your_domain}
+Search for "{brand_name}" and "Alfaa Panels" mentions across the web.
+Find unlinked mentions that are link building opportunities.
+Use query: "Alfaa Panels" OR "alfaapanels.com" -site:{your_domain}
 
 TASK 2 - Competitor Backlink Research
-For each competitor, find sites linking to them but not to {your_domain}.
+For each competitor ({', '.join(competitors)}), search for sites that reference or link to them.
+Identify which linking domains are relevant and could also link to {your_domain}.
+Use link gap analysis to find opportunities.
 
 TASK 3 - Link Building Opportunities
-Find resource pages, guest post opportunities, broken links in {niche} niche.
+Find these specific opportunity types in the sandwich panel / cold room / insulation niche:
+a) Industry resource pages and directories about cold storage, warehousing, insulated panels
+b) Guest post opportunities on construction, cold chain, and industrial building blogs
+c) Broken links on competitor resource pages
+d) Industry association websites (ISHRAE, CII, FICCI, NASSCOM for cold chain)
+e) Trade publication opportunities (Construction Week India, Cold Chain India, etc.)
 
 TASK 4 - Outreach Templates
-Generate personalized email templates for top 3 prospects.
+Generate personalized email templates for the top 5 highest-quality prospects found.
 
-TASK 5 - Final Report
-Create a prioritized 30-day off-page SEO action plan."""
+TASK 5 - Final Prioritized Action Plan
+Create a concrete 30-day off-page SEO action plan with:
+- Top 10 specific backlink targets with URLs and contact info where available
+- 5 guest post topic ideas for the sandwich panel / cold storage industry
+- 3 broken link opportunities
+- Brand mention conversion targets
+- Priority ranking (HIGH/MEDIUM/LOW) for each action
+- Expected impact on domain authority and rankings"""
         }],
     )
 
@@ -174,17 +229,20 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    date_suffix = (report_date or "").replace("-", "_") or "report"
+    report_filename = f"reports/seo_report_{date_suffix}.md"
+
+    import os
+    os.makedirs("reports", exist_ok=True)
+
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {report_date or 'N/A'}\n\n")
         f.write("\n\n".join(full_report))
+
     print(f"\nReport saved to: {report_filename}")
+    return report_filename, full_report
 
 
 if __name__ == "__main__":
-    run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
-    )
+    run_offpage_seo_agent(config=ALFAA_CONFIG)
