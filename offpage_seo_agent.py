@@ -1,5 +1,6 @@
 import anthropic
 from anthropic import beta_tool
+from datetime import date
 
 client = anthropic.Anthropic()
 
@@ -127,7 +128,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
     print("=" * 60)
 
     runner = client.beta.messages.tool_runner(
-        model="claude-opus-4-6",
+        model="claude-opus-5",
         max_tokens=16000,
         tools=[
             analyze_backlink_quality,
@@ -135,8 +136,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
             score_link_prospect,
             generate_outreach_template,
             identify_link_gap_opportunity,
-            {"type": "web_search_20260209", "name": "web_search"},
-            {"type": "web_fetch_20260209", "name": "web_fetch"},
+            {"type": "web_search_20250305", "name": "web_search"},
         ],
         messages=[{
             "role": "user",
@@ -174,17 +174,18 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    today = date.today().isoformat()
+    report_filename = f"seo_report_{your_domain.replace('.', '_')}_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\nDate: {today}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
 
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="aluminum composite panels cladding facade building materials",
+        competitors=["dibond.com", "alucobond.com", "reynobond.com", "alpolic.com"]
     )
