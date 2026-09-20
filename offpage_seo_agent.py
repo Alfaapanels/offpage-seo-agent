@@ -122,6 +122,21 @@ def identify_link_gap_opportunity(competitor_domain: str, your_domain: str, link
     return f"LINK GAP OPPORTUNITY\nCompetitor: {competitor_domain}\nYour site: {your_domain}\nLinking page topic: {linking_page_topic}\n\nActions:\n1. Find what content earned {competitor_domain} this link\n2. Create better content on the same topic for {your_domain}\n3. Reach out to the linking page with your resource"
 
 
+# Alfaa Panels configuration
+ALFAA_CONFIG = {
+    "your_domain": "alfaapanels.com",
+    "brand_name": "Alfaa Panels",
+    "niche": "insulated sandwich panel manufacturer PUF PIR cold room clean room India",
+    "competitors": [
+        "rinac.com",
+        "epack.in",
+        "alfapeb.in",
+        "beardsell.co.in",
+        "metecno.in",
+    ],
+}
+
+
 def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competitors: list):
     print(f"\nStarting Off-Page SEO Agent for: {your_domain}\n")
     print("=" * 60)
@@ -140,14 +155,14 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
         ],
         messages=[{
             "role": "user",
-            "content": f"""You are an expert off-page SEO strategist.
-Perform a complete off-page SEO analysis for: {your_domain}
+            "content": f"""You are an expert off-page SEO strategist for {brand_name} ({your_domain}).
+Alfaa Panels is India's leading insulated sandwich panel manufacturer with 35+ years of expertise,
+pan-India manufacturing facilities, and products including PUF, PIR, Rockwool, Cold Room and Clean Room panels.
 
-Brand name: {brand_name}
 Niche: {niche}
 Competitors: {', '.join(competitors)}
 
-Execute these tasks:
+Execute these tasks today:
 
 TASK 1 - Brand Mention Audit
 Search for "{brand_name}" mentions. Find unlinked mentions and opportunities.
@@ -155,17 +170,22 @@ Search: "{brand_name}" -site:{your_domain}
 
 TASK 2 - Competitor Backlink Research
 For each competitor, find sites linking to them but not to {your_domain}.
+Focus on: B2B directories, industry blogs, construction portals, engineering forums.
 
 TASK 3 - Link Building Opportunities
-Find resource pages, guest post opportunities, broken links in {niche} niche.
+Find resource pages, guest post opportunities, broken links in the insulated panels / cold storage / construction niche.
+Target: Indian construction portals, pharma facility blogs, food processing directories.
 
 TASK 4 - Outreach Templates
-Generate personalized email templates for top 3 prospects.
+Generate personalized email templates for top 3 prospects found today.
 
 TASK 5 - Final Report
-Create a prioritized 30-day off-page SEO action plan."""
+Create a prioritized action plan with specific URLs, contact details, and outreach copy ready to send."""
         }],
     )
+
+    from datetime import date
+    import os
 
     full_report = []
     for message in runner:
@@ -174,17 +194,15 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    os.makedirs("daily_reports", exist_ok=True)
+    report_filename = f"daily_reports/backlink_report_{date.today().isoformat()}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {date.today().isoformat()}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
 
 if __name__ == "__main__":
-    run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
-    )
+    run_offpage_seo_agent(**ALFAA_CONFIG)
