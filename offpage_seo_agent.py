@@ -181,10 +181,18 @@ Create a prioritized 30-day off-page SEO action plan."""
     print(f"\nReport saved to: {report_filename}")
 
 
+ALFAA_CONFIG = {
+    "your_domain": "alfaapanels.com",
+    "brand_name": "Alfaa Panels",
+    "niche": "insulated sandwich panel PUF PIR cold room manufacturer India",
+    "competitors": [
+        "epack.in",
+        "rinac.com",
+        "metecno.in",
+        "jindalmectec.com",
+        "viraatindustries.com",
+    ],
+}
+
 if __name__ == "__main__":
-    run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
-    )
+    run_offpage_seo_agent(**ALFAA_CONFIG)
