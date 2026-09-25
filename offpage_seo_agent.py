@@ -141,7 +141,7 @@ def run_offpage_seo_agent(your_domain: str, brand_name: str, niche: str, competi
         messages=[{
             "role": "user",
             "content": f"""You are an expert off-page SEO strategist.
-Perform a complete off-page SEO analysis for: {your_domain}
+Perform a complete off-page SEO analysis and backlink building session for: {your_domain}
 
 Brand name: {brand_name}
 Niche: {niche}
@@ -150,20 +150,25 @@ Competitors: {', '.join(competitors)}
 Execute these tasks:
 
 TASK 1 - Brand Mention Audit
-Search for "{brand_name}" mentions. Find unlinked mentions and opportunities.
+Search for "{brand_name}" mentions online. Find unlinked mentions and link-building opportunities.
 Search: "{brand_name}" -site:{your_domain}
 
 TASK 2 - Competitor Backlink Research
-For each competitor, find sites linking to them but not to {your_domain}.
+For each competitor, find authoritative sites linking to them but not to {your_domain}.
+These are your highest-priority link gap opportunities.
 
 TASK 3 - Link Building Opportunities
-Find resource pages, guest post opportunities, broken links in {niche} niche.
+Find resource pages, guest post opportunities, directories, forums, and broken links in the {niche} niche.
+Target: industry blogs, trade directories, construction/building material sites, review platforms.
 
 TASK 4 - Outreach Templates
-Generate personalized email templates for top 3 prospects.
+Generate personalized email templates for the top 5 prospects found.
 
-TASK 5 - Final Report
-Create a prioritized 30-day off-page SEO action plan."""
+TASK 5 - Daily Action Items
+List exactly 5 specific backlink-building actions to take today, with target URLs, contact info where available, and step-by-step instructions.
+
+TASK 6 - Final Prioritized Report
+Create a prioritized 30-day off-page SEO action plan with weekly milestones."""
         }],
     )
 
@@ -174,17 +179,23 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    import datetime
+    date_str = datetime.date.today().isoformat()
+    report_filename = f"reports/seo_report_{date_str}.md"
+    import os
+    os.makedirs("reports", exist_ok=True)
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {date_str}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
+    return report_filename
 
 
 if __name__ == "__main__":
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="architectural panels building facade cladding panels manufacturer",
+        competitors=["rockwoolgroup.com", "kingspan.com", "alucobond.com", "etalbond.com"]
     )
