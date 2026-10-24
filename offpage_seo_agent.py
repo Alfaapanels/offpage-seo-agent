@@ -174,17 +174,24 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    from datetime import date
+    today = date.today().strftime("%Y%m%d")
+    report_filename = f"seo_report_{your_domain.replace('.', '_')}_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"## Date: {date.today().strftime('%Y-%m-%d')}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
 
 
 if __name__ == "__main__":
+    from datetime import date
+    import sys
+
+    domain = sys.argv[1] if len(sys.argv) > 1 else "alfaapanels.com"
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain=domain,
+        brand_name="Alfa Panels",
+        niche="aluminum composite panels ACP cladding facade building materials",
+        competitors=["alucobond.com", "reynobond.com", "dibond.com"]
     )
