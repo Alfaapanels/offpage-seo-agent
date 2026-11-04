@@ -1,7 +1,15 @@
+import os
+import sys
 import anthropic
 from anthropic import beta_tool
 
-client = anthropic.Anthropic()
+_api_key = os.environ.get("ANTHROPIC_API_KEY")
+if not _api_key:
+    print("ERROR: ANTHROPIC_API_KEY environment variable is not set.", file=sys.stderr)
+    print("Set it with: export ANTHROPIC_API_KEY=your_key_here", file=sys.stderr)
+    sys.exit(1)
+
+client = anthropic.Anthropic(api_key=_api_key)
 
 @beta_tool
 def analyze_backlink_quality(url: str, backlink_url: str, anchor_text: str) -> str:
@@ -174,17 +182,31 @@ Create a prioritized 30-day off-page SEO action plan."""
                 print(block.text)
                 full_report.append(block.text)
 
-    report_filename = f"seo_report_{your_domain.replace('.', '_')}.md"
+    import os
+    from datetime import date
+    reports_dir = "reports"
+    os.makedirs(reports_dir, exist_ok=True)
+    today = date.today().isoformat()
+    report_filename = f"{reports_dir}/seo_report_{your_domain.replace('.', '_')}_{today}.md"
     with open(report_filename, "w") as f:
-        f.write(f"# Off-Page SEO Report: {your_domain}\n\n")
+        f.write(f"# Off-Page SEO Report: {your_domain}\n")
+        f.write(f"**Date:** {today}\n\n")
         f.write("\n\n".join(full_report))
     print(f"\nReport saved to: {report_filename}")
 
 
 if __name__ == "__main__":
+    import sys
+    from datetime import date
+
     run_offpage_seo_agent(
-        your_domain="yoursite.com",          # Change this
-        brand_name="Your Brand Name",         # Change this
-        niche="digital marketing",            # Change this
-        competitors=["competitor1.com"]       # Change this
+        your_domain="alfaapanels.com",
+        brand_name="Alfa Panels",
+        niche="aluminum composite panels ACP building facade cladding signage",
+        competitors=[
+            "alucobond.com",
+            "reynobond.com",
+            "alpolic.com",
+            "alucoworld.com",
+        ]
     )
